@@ -10,25 +10,105 @@ import cookieParser from 'cookie-parser';
 const app = express();
 const port = process.env.PORT || 4444;
 const mongodbURI = process.env.mongodbURI || "mongodb+srv://MERN-Ecommerce:saaimahmedkhan123@cluster0.ztfqhsh.mongodb.net/learn-MongoDB?retryWrites=true&w=majority"
+const SECRET = process.env.SECRET || "topsecret";
 
 
 
-app.use(cors())
 app.use(express.json());
 mongoose.connect(mongodbURI)
+app.use(cookieParser());
 
+
+
+app.use(cors({
+    origin: ['http://localhost:3000', "*"],
+    credentials: true
+}));
 
 
 // ----------------------------------- MongoDB -----------------------------------
-let productSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    price: Number,
-    ratings: Number,
-    description: String,
-    createdOn: { type: Date, default: Date.now }
+let usersSchema = new mongoose.Schema({
+    firstName: { type: String },
+    lastName: { type: String },
+    email: { type: String, required: true },
+    password: { type: String, required: true },
+    createdOn: { type: Date, default: Date.now },
 })
-const productModel = mongoose.model('Products', productSchema);
+const userModel = mongoose.model('Users', usersSchema);
 // ----------------------------------- MongoDB -----------------------------------
+
+
+
+// ----------------------------------- SignUp -----------------------------------
+pp.post("/signup", (req, res) => {
+
+    let body = req.body;
+
+    if (!body.firstName || !body.lastName || !body.email || !body.password) {
+        res.status(400).send(
+            `required fields missing, request example: 
+                {
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "email": "abc@abc.com",
+                    "password": "12345"
+                }`
+        );
+        return;
+    }
+
+    req.body.email = req.body.email.toLowerCase();
+
+    // check if user already exist // query email user
+    userModel.findOne({ email: body.email }, (err, user) => {
+        if (!err) {
+            console.log("user: ", user);
+
+            if (user) { // user already exist
+                console.log("user already exist: ", user);
+                res.status(400).send({ message: "user already exist,, please try a different email" });
+                return;
+
+            } else { // user not already exist
+
+                // bcrypt hash
+                stringToHash(body.password).then(hashString => {
+
+                    userModel.create({
+                        firstName: body.firstName,
+                        lastName: body.lastName,
+                        email: body.email,
+                        password: hashString
+                    },
+                        (err, result) => {
+                            if (!err) {
+                                console.log("data saved: ", result);
+                                res.status(201).send({ message: "user is created" });
+                            } else {
+                                console.log("db error: ", err);
+                                res.status(500).send({ message: "internal server error" });
+                            }
+                        });
+                })
+
+            }
+        } else {
+            console.log("db error: ", err);
+            res.status(500).send({ message: "db error in query" });
+            return;
+        }
+    })
+});
+// ----------------------------------- SignUp -----------------------------------
+
+
+
+
+
+
+
+
+
 
 
 
@@ -41,7 +121,7 @@ app.post('/product', (req, res) => {
         })
         return;
     }
-    productModel.create({
+    userModel.create({
         name: body.name,
         price: body.price,
         ratings: body.ratings,
@@ -68,7 +148,7 @@ app.post('/product', (req, res) => {
 // ----------------------------------- Get Product -----------------------------------
 // ------------------------ Get All Product ------------------------
 app.get('/products', (req, res) => {
-    productModel.find({}, (error, allFound) => {
+    userModel.find({}, (error, allFound) => {
         if (!error) {
             console.log("uploaded", allFound)
             res.send({
@@ -88,7 +168,7 @@ app.get('/products', (req, res) => {
 // ------------------------ Get Specified Product ------------------------
 app.get('/product/:id', (req, res) => {
     const id = req.params.id
-    productModel.findOne({ _id: id }, (error, found) => {
+    userModel.findOne({ _id: id }, (error, found) => {
         if (!error) {
             if (found) {
                 res.send({
@@ -117,7 +197,7 @@ app.get('/product/:id', (req, res) => {
 // ----------------------------------- Delete Product -----------------------------------
 // ------------------------ Delete All Product ------------------------
 app.delete('/products', (req, res) => {
-    productModel.deleteMany({}, (error, data) => {
+    userModel.deleteMany({}, (error, data) => {
         if (!error) {
             res.send({
                 message: `All products deleted`
@@ -134,7 +214,7 @@ app.delete('/products', (req, res) => {
 // ------------------------ Delete Specified Product ------------------------
 app.delete('/product/:id', (req, res) => {
     const id = req.params.id
-    productModel.deleteOne({ _id: id }, (error, deletedData) => {
+    userModel.deleteOne({ _id: id }, (error, deletedData) => {
         console.log(deletedData)
         if (!error) {
             if (deletedData.deletedCount === 1) {
@@ -174,7 +254,7 @@ app.put('/product/:id', async (req, res) => {
         return;
     }
     try {
-        let data = await productModel.findByIdAndUpdate(id,
+        let data = await userModel.findByIdAndUpdate(id,
             {
                 name: body.name,
                 price: body.price,
