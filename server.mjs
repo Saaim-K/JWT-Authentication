@@ -1,5 +1,5 @@
 import express from 'express'
-// import path from 'path'
+import path from 'path'
 import cors from 'cors'
 import mongoose from 'mongoose'
 import jwt from 'jsonwebtoken'
@@ -428,9 +428,9 @@ process.on('SIGINT', function () {/////this function will run jst before app is 
 
 
 
-// const __dirname = path.resolve();
-// app.use('/', express.static(path.join(__dirname, './app/build')))
-// app.use('*', express.static(path.join(__dirname, './app/build')))
+const __dirname = path.resolve();
+app.use('/', express.static(path.join(__dirname, './app/build')))
+app.use('*', express.static(path.join(__dirname, './app/build')))
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`)
