@@ -4,58 +4,49 @@ import axios from 'axios'
 import { BrowserRouter as Router, Link, Routes, Route, Navigate } from 'react-router-dom'
 import Home from './Components/Home';
 import About from './Components/About';
+import Gallery from './Components/Gallery';
+import Profile from './Components/Profile';
 import Login from './Components/Login';
 import Signup from './Components/Signup';
 
 const App = () => {
   let { state, dispatch } = useContext(GlobalContext);
   const [fullName, setFullName] = useState("");
+
   const logoutHandler = () => {
 
   }
 
   useEffect(() => {
-
-    const baseUrl = 'http://localhost:5001'
-
+    const baseUrl = 'http://localhost:4444'
     const getProfile = async () => {
-
       try {
         let response = await axios.get(`${baseUrl}/products`, {
           withCredentials: true
         })
-
         console.log("response: ", response);
-
-
         dispatch({
           type: 'USER_LOGIN'
         })
       } catch (error) {
-
         console.log("axios error: ", error);
-
         dispatch({
           type: 'USER_LOGOUT'
         })
       }
     }
     getProfile();
-
-  }, [])
+  }
+    , [])
 
   return (
     <>
-
-
       <Router>
-
         {(state.isLogin === true) ?
-
           <>
             <h1> <Link to={`/`}>Home</Link> </h1>
-            <h1> <Link to={`/gallery`}>Gallery</Link> </h1>
             <h1> <Link to={`/about`}>About</Link> </h1>
+            <h1> <Link to={`/gallery`}>Gallery</Link> </h1>
             <h1> <Link to={`/profile`}>Profile</Link> </h1>
             <h1> {fullName} <button onClick={logoutHandler}>Logout</button> </h1>
           </>
@@ -71,6 +62,8 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="about" element={<About />} />
+            <Route path="gallery" element={<Gallery />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="*" element={<Navigate to="/" replace={true} />} />
           </Routes>
           : null}
@@ -82,11 +75,7 @@ const App = () => {
           </Routes>
           : null
         }
-
       </Router>
-
-
-
     </>
   )
 }
@@ -115,7 +104,7 @@ export default App
 // const App = () => {
 //   // ----------------------------- States -----------------------------
 //   const [product, setProduct] = useState([])
-//   const [addProduct, setAddProduct] = useState(false)//Runs every time product is added ,deleted or edited 
+//   const [addProduct, setAddProduct] = useState(false)//Runs every time product is added ,deleted or edited
 //   const [editMode, setEditMode] = useState(false)
 //   const [editProduct, setEditProduct] = useState({})
 //   const [name, setName] = useState('')

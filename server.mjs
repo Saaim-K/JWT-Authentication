@@ -10,7 +10,7 @@ import { stringToHash, varifyHash } from "bcrypt-inzi"
 
 const app = express();
 const port = process.env.PORT || 4444;
-const mongodbURI = process.env.mongodbURI || "mongodb+srv://MERN-Ecommerce:saaimahmedkhan123@cluster0.ztfqhsh.mongodb.net/learn-MongoDB?retryWrites=true&w=majority"
+const mongodbURI = process.env.mongodbURI || "mongodb+srv://Learning-JWT:Learning-JWT@cluster0.tcywpkb.mongodb.net/Learning-JWT?retryWrites=true&w=majority"
 const SECRET = process.env.SECRET || "topsecret";
 
 
@@ -52,7 +52,7 @@ app.post("/signup", (req, res) => {
     let body = req.body;
     if (!body.firstName || !body.lastName || !body.email || !body.password) {
         res.status(400).send(
-            `required fields missing, request example: 
+            `Required fields missing, Request Example: 
                 {
                     "firstName": "John",
                     "lastName": "Doe",
@@ -87,7 +87,7 @@ app.post("/signup", (req, res) => {
                     },
                         (err, result) => {
                             if (!err) {
-                                console.log("data saved: ", result);
+                                console.log("Data Saved: ", result);
                                 res.status(201).send(
                                     {
                                         message: "User created"
@@ -105,7 +105,7 @@ app.post("/signup", (req, res) => {
             // ------------------------ Check if user doesn't exists and Create a User ------------------------
         } else {
             console.log("database error: ", err);
-            res.status(500).send({ message: "database error in query" });
+            res.status(500).send({ message: "Database Error in Query" });
             return;
         }
     })
@@ -120,7 +120,7 @@ app.post("/login", (req, res) => {
 
     if (!body.email || !body.password) {
         res.status(400).send(
-            `required fields missing, request example: 
+            `Required fields missing, Request example: 
                 {
                     "email": "abc@abc.com",
                     "password": "12345"
@@ -153,13 +153,13 @@ app.post("/login", (req, res) => {
                                 iat: Math.floor(Date.now() / 1000) - 30,
                                 exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24),
                             }, SECRET);
-                            console.log("token: ", token);
+                            console.log("Token: ", token);
                             res.cookie('Token', token, {
                                 maxAge: 86_400_000,
                                 httpOnly: true
                             });
                             res.send({
-                                message: "login successful",
+                                message: "Login Successful",
                                 profile: {
                                     email: data.email,
                                     firstName: data.firstName,
@@ -170,19 +170,19 @@ app.post("/login", (req, res) => {
                             });
                             return;
                         } else {
-                            console.log("password did not match");
+                            console.log("Password did not match");
                             res.status(401).send({ message: "Incorrect email or password" });
                             return;
                         }
                     })
                 } else { // user not already exist
-                    console.log("user not found");
+                    console.log("User not found");
                     res.status(401).send({ message: "Incorrect email or password" });
                     return;
                 }
             } else {
-                console.log("db error: ", err);
-                res.status(500).send({ message: "login failed, please try later" });
+                console.log("Database error: ", err);
+                res.status(500).send({ message: "Login Failed, Please try later" });
                 return;
             }
         })
@@ -205,7 +205,7 @@ app.use((req, res, next) => {
     console.log("req.cookies: ", req.cookies);
     if (!req?.cookies?.Token) {
         res.status(401).send({
-            message: "include http-only credentials with every request"
+            message: "Include http-only credentials with every request"
         })
         return;
     }
@@ -219,14 +219,14 @@ app.use((req, res, next) => {
                     maxAge: 1,
                     httpOnly: true
                 });
-                res.send({ message: "token expired" })
+                res.send({ message: "Token Expired" })
             } else {
-                console.log("token approved");
+                console.log("Token Approved");
                 req.body.token = decodedData
                 next();
             }
         } else {
-            res.status(401).send("invalid token")
+            res.status(401).send("Invalid Token")
         }
     });
 })
